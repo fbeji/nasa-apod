@@ -1,0 +1,20 @@
+<resources>
+  <string name="app_name">NASA APOD</string>
+  <string name="base_url">https://api.nasa.gov/</string>
+  <string name="error_message">Unable to retrieve APOD for selected date.</string>
+  <string name="title_image">Image</string>
+  <string name="title_history">History</string>
+  <string name="image_info">Show info</string>
+  <string name="calendar">Pick date</string>
+  <string name="context_delete">Delete</string>
+  <string name="context_info">Show info</string>
+
+  <string name="url_label">URL:</string>
+  <string name="hd_url_label">HD URL:</string>
+  <string name="positive_label">OK</string>
+
+  <string name="access_count_format">%,d</string>
+  <string name="login_failure_message">Unable to sign in with provided credentials</string>
+  <string name="sign_out">Sign out</string>
+
+</resources>

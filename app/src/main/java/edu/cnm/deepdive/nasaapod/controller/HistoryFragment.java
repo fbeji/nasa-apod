@@ -1,0 +1,123 @@
+package edu.cnm.deepdive.nasaapod.controller;
+
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View;
+import android.view.ViewGroup;
+import edu.cnm.deepdive.nasaapod.R;
+import edu.cnm.deepdive.nasaapod.model.entity.Access;
+import edu.cnm.deepdive.nasaapod.model.entity.Apod;
+import edu.cnm.deepdive.nasaapod.model.pojo.ApodWithAccesses;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.DeleteApodTask;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.InsertAccessTask;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectAllApodTask;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectAllApodWithAccessesTask;
+import edu.cnm.deepdive.nasaapod.service.FragmentService;
+import edu.cnm.deepdive.nasaapod.view.HistoryAdapter;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Hosts a {@link RecyclerView} of {@link Apod} instances from the local database, allowing user
+ * selection for display in the {@link ImageFragment} set by {@link #setImageFragment(ImageFragment)}.
+ */
+public class HistoryFragment extends Fragment implements View.OnClickListener {
+
+  private List<ApodWithAccesses> history;
+  private HistoryAdapter adapter;
+  private ImageFragment imageFragment;
+
+  @Override
+  public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setRetainInstance(true);
+  }
+
+  @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+      Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.fragment_history, container, false);
+    RecyclerView historyView = view.findViewById(R.id.history_view);
+    history = new ArrayList<>();
+    adapter = new HistoryAdapter(this, history);
+    historyView.setAdapter(adapter);
+    refresh();
+    return view;
+  }
+
+  @Override
+  public void onHiddenChanged(boolean hidden) {
+    super.onHiddenChanged(hidden);
+    refresh();
+  }
+
+  /**
+   * Handles a click on a {@link View} in the {@link RecyclerView} by extracting the {@link Apod}
+   * reference returned by {@link View#getTag()}, showing the image fragment, invoking {@link
+   * ImageFragment#setApod(Apod)}, and finally updating the {@link
+   * android.support.design.widget.BottomNavigationView} in {@link NavActivity}.
+   *
+   * @param view visual presentation of a single {@link Apod} instance.
+   */
+  @Override
+  public void onClick(View view) {
+    Apod apod = (Apod) view.getTag();
+    NavActivity activity = ((NavActivity) getActivity());
+    FragmentService.getInstance().showFragment(activity, R.id.fragment_container, imageFragment);
+    Access access = new Access();
+    access.setApodId(apod.getId());
+    new InsertAccessTask().execute(access);
+    imageFragment.setApod(apod);
+    activity.getNavigation().setSelectedItemId(R.id.navigation_image);
+  }
+
+  /**
+   * Sets the {@link ImageFragment} used for APOD image display.
+   *
+   * @param fragment display host {@link ImageFragment}.
+   */
+  public void setImageFragment(ImageFragment fragment) {
+    imageFragment = fragment;
+  }
+
+  /**
+   * Queries the local database for {@link Apod} instances, populating (indirectly) a {@link
+   * RecyclerView} with the results.
+   */
+  public void refresh() {
+    if (!isHidden()) {
+      new SelectAllApodWithAccessesTask()
+          .setSuccessListener((apods) -> {
+            history.clear();
+            history.addAll(apods);
+            adapter.notifyDataSetChanged();
+          })
+          .execute();
+    }
+  }
+
+  public void createContextMenu(ContextMenu menu, int position, Apod apod) {
+    getActivity().getMenuInflater().inflate(R.menu.item_context, menu);
+    menu.findItem(R.id.context_delete).setOnMenuItemClickListener((item) -> {
+      new DeleteApodTask()
+          .setSuccessListener((v) -> {
+            history.remove(position);
+            adapter.notifyItemRemoved(position);
+          })
+          .execute(apod);
+      return true;
+    });
+    menu.findItem(R.id.context_info).setOnMenuItemClickListener((item) -> {
+      ((NavActivity) getActivity()).showFullInfo(apod);
+      return true;
+    });
+  }
+
+}
