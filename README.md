@@ -1,20 +1,95 @@
 ## Purpose
 
+This app is intended to be a convenient, user-friendly way to view and download NASA's Astronomy Picture of the Day (APOD) content. I've enjoyed the APOD content for several years, but have found it relatively inconvenient to use with a general-purpose internet browser&mdash;especially when downloading content for use as wallpaper, etc.
+
 ## Current state
 
-## Testing conditions
+The app is fully operational for testing/pre-release use: 
+
+* Images and videos for the current and other selected dates can be viewed.
+* History of APOD accesses is maintained in local database.
+* Standard-resolution image content is cached in local storage for fast retrieval.
+* High-resolution image content can be downloaded on demand.
+* Local data records and cached standard-resolution images can be deleted on demand. 
+
+Note that the Stetho inspection features are currently still enabled; for a production release, these should be disabled &amp; removed from the app. Also, building and running the app still requires that the user obtain a NASA web service API key. 
+
+## Testing
+
+### Operations
+
+* Load APOD for current &amp; selected dates.
+* Change orientation.
+* Download APOD image.
+* Delete APOD for current &amp; selected dates. 
+
+### Environments
+
+#### Physical devices
+
+##### Amazon Fire HD 8 7<sup>th</sup> Generation (Fire OS 5.3.6.4), Android 5.1.1 (API 22)
+
+* No issues observed.
+
+##### LG Q7+, Android 8.1 (API 27)
+
+* Difficulty in getting a clean install of debug APK; appears to be a device configuration issue.
+* No issues observed after full uninstall &amp; re-install.
+
+#### Emulators
+
+##### Pixel 2 XL (API 28)
+
+* Orientation changes don't appear to be detected in emulator (not specific to this app).
+
+##### Nexus 5X (API 24)
+
+* Orientation changes detected unreliably (not specific to this app).
+* Video doesn't play (not specific to this app).  
 
 ## 3<sup>rd</sup>-party resources
 
 ### Libraries
 
+* [Google Gson](https://github.com/google/gson)
+
+    Used for deserializing JSON content received from NASA APOD web service.
+    
+* [Retrofit 2](https://square.github.io/retrofit/) (incl. OkHttp &amp; Retrofit converter for Gson)
+
+    Used to define &amp; execute requests to NASA APOD web service.  
+    
+* [Facebook Stetho](https://github.com/facebook/stetho) 
+
+    Primarily used in development, to allow inspection of local display resources and database contents. 
+    
+* [Deep Dive Coding Date Utilities](https://github.com/deep-dive-coding-java/date-utilities)
+
+    Provides a date-only datatype&mdash;i.e. a lightweight replacement for the `LocalDate` classes in Java 8 (not available in Android prior to API 26) and Joda-Time. This datatype supports the implementation of timezone independence in the app, in retrieving &amp; storing APOD content.    
+
+* [Deep Dive Coding Android Utilities](https://github.com/deep-dive-coding-java/android-utilities) 
+
+    This library provides the date picker dialog used in the app, as well as a non-UI component that simplifies definition &amp; use of some types of coordination between foreground &amp; background tasks. 
+
 ### External services
+
+The only external service currently used in the app is (of course) the [NASA APOD web service](https://api.nasa.gov/api.html#apod).  
 
 ## Potential improvements
 
 ### Functional stretch goals
 
+* Either embed the NASA API key in the app (subject to NASA licensing terms), or implement an automatic key request/install feature on installation.
+
+* Provide a "share" feature, supporting sending APOD links (at least) via SMS, email, etc.
+
+* Automatically retrieve APOD information (w/o caching media content) for the most recent 30 days.
+
+* Modify deletion feature so that only cached media content&mdash;not title &amp; other metadata&mdash;is deleted.
+
 ### Cosmetic improvements
+
+* Modify history display to indicate the existence of cached media content.  
 
 ## Design documentation
 
