@@ -1,6 +1,18 @@
 ## Purpose
 
-This app is intended to be a convenient, user-friendly way to view and download NASA's Astronomy Picture of the Day (APOD) content. I've enjoyed the APOD content for several years, but have found it relatively inconvenient to use with a general-purpose internet browser&mdash;especially when downloading content for use as wallpaper, etc.
+This app is intended to be a convenient, user-friendly way to view and download NASA's Astronomy Picture of the Day (APOD) content. 
+
+I've enjoyed the APOD content for several years, but have found it relatively inconvenient to use with a general-purpose internet browser&mdash;especially when downloading content for use as wallpaper, etc. My aim in designing and building this app is not only to provide a simplified (but effective) user interface to the NASA APOD service, but also to illustrate a number of features, components, and techniques that are (in my opinion) useful to new Android developers, as they learn to develop apps for that platform&mdash;such as
+
+* Consuming web services with Retrofit &amp; OkHttp.
+* Deserializing JSON data with Gson & the Retrofit Gson converter.
+* Basic use of the Room ORM components.
+* Basic use of the `BottomNavigationView` component.
+* Basic use of the `RecyclerView` component, with adapters &amp; holders.
+* Simple management of fragments in a navigation view-oriented app.
+* Definition &amp; use of different types of menus: navigation, option, and context.
+* Basic operations on internal &amp; external files.
+* Explicit permission requests.
 
 ## Current state
 
@@ -30,20 +42,24 @@ Note that the Stetho inspection features are currently still enabled; for a prod
 ##### Amazon Fire HD 8 7<sup>th</sup> Generation (Fire OS 5.3.6.4), Android 5.1.1 (API 22)
 
 * No issues observed.
+* No explicit permission request appears (as expected).
 
 ##### LG Q7+, Android 8.1 (API 27)
 
 * Difficulty in getting a clean install of debug APK; appears to be a device configuration issue.
 * No issues observed after full uninstall &amp; re-install.
+* Explicit permission request appears (as expected).
 
 #### Emulators
 
 ##### Pixel 2 XL (API 28)
 
+* Explicit permission request appears (as expected).
 * Orientation changes don't appear to be detected in emulator (not specific to this app).
 
 ##### Nexus 5X (API 24)
 
+* No explicit permission request appears (as expected).
 * Orientation changes detected unreliably (not specific to this app).
 * Video doesn't play (not specific to this app).  
 
@@ -79,7 +95,7 @@ The only external service currently used in the app is (of course) the [NASA APO
 
 ### Functional stretch goals
 
-* Either embed the NASA API key in the app (subject to NASA licensing terms), or implement an automatic key request/install feature on installation.
+* Either embed the NASA API key in the app (subject to NASA licensing terms), or implement an automatic key request/install feature on installation. (If the latter, this might be integrated with Google Sign In, which was included for demonstration purposes in an earlier version of this app, but is not in the current version.)
 
 * Provide a "share" feature, supporting sending APOD links (at least) via SMS, email, etc.
 
@@ -90,6 +106,8 @@ The only external service currently used in the app is (of course) the [NASA APO
 ### Cosmetic improvements
 
 * Modify history display to indicate the existence of cached media content.  
+
+* User confirmation of delete operation.
 
 ## Design documentation
 
