@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "fa639a53a76bd4d58e6b26b7159f80d9",
+    "identityHash": "1136ce3669c00eab7d52fab6517987ef",
     "entities": [
       {
         "tableName": "Apod",
@@ -106,6 +106,15 @@
         },
         "indices": [
           {
+            "name": "index_Access_apod_id_timestamp",
+            "unique": false,
+            "columnNames": [
+              "apod_id",
+              "timestamp"
+            ],
+            "createSql": "CREATE  INDEX `index_Access_apod_id_timestamp` ON `${TABLE_NAME}` (`apod_id`, `timestamp`)"
+          },
+          {
             "name": "index_Access_apod_id",
             "unique": false,
             "columnNames": [
@@ -131,7 +140,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"fa639a53a76bd4d58e6b26b7159f80d9\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"1136ce3669c00eab7d52fab6517987ef\")"
     ]
   }
 }

@@ -1,12 +1,10 @@
 package edu.cnm.deepdive.nasaapod.controller;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,16 +18,13 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 import edu.cnm.deepdive.nasaapod.R;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.DeleteApodTask;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.InsertApodTask;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectApodTask;
 import edu.cnm.deepdive.nasaapod.service.ApodWebService.GetFromNasaTask;
+import edu.cnm.deepdive.nasaapod.service.FileStorageService;
 import edu.cnm.deepdive.util.Date;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Calendar;
 
 /**
@@ -40,9 +35,6 @@ import java.util.Calendar;
 public class ImageFragment extends Fragment {
 
   private static final String APOD_KEY = "apod";
-  private static final int BUFFER_SIZE = 4096;
-  private static final String SAVE_ERROR_LOG_MESSAGE = "Unable to save image";
-  private static final String NO_PRIVATE_STORAGE_ERROR = "Unable to access private file storage.";
 
   private WebView webView;
   private Apod apod;
@@ -63,11 +55,7 @@ public class ImageFragment extends Fragment {
     if (savedInstanceState != null) {
       apod = (Apod) savedInstanceState.getSerializable(APOD_KEY);
     }
-    if (apod != null) {
-      setApod(apod);
-    } else {
-      loadApod(Date.fromCalendar(Calendar.getInstance()));
-    }
+    setApod(apod);
     return view;
   }
 
@@ -78,12 +66,28 @@ public class ImageFragment extends Fragment {
   }
 
   @Override
+  public void onPrepareOptionsMenu(Menu menu) {
+    super.onPrepareOptionsMenu(menu);
+    menu.findItem(R.id.image_download).setVisible(apod != null && apod.isMediaImage());
+  }
+
+  @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == R.id.info) {
-      getNavActivity().showFullInfo(apod);
-      return true;
+    boolean handled = true;
+    switch(item.getItemId()) {
+      case R.id.image_info:
+        getNavActivity().showFullInfo(apod);
+        break;
+      case R.id.image_download:
+        getNavActivity().downloadApod(apod);
+        break;
+      case R.id.image_delete:
+        deleteApod(apod);
+        break;
+      default:
+        handled = super.onOptionsItemSelected(item);
     }
-    return super.onOptionsItemSelected(item);
+    return handled;
   }
 
   @Override
@@ -107,13 +111,20 @@ public class ImageFragment extends Fragment {
    * @param apod current {@link Apod} instance.
    */
   public void setApod(Apod apod) {
-    this.apod = apod;
-    getNavActivity().getLoading().setVisibility(View.VISIBLE);
-    String url = apod.getUrl();
-    if (apod.isMediaImage() && fileExists(filenameFromUrl(url))) {
-      url = urlFromFilename(filenameFromUrl(url));
+    if (apod != null) {
+      FileStorageService service = FileStorageService.getInstance();
+      this.apod = apod;
+      getNavActivity().getLoading().setVisibility(View.VISIBLE);
+      String url = apod.getUrl();
+      if (apod.isMediaImage() && service.internalFileExists(service.filenameFromUrl(url))) {
+        url = service.internalUrlFromFilename(service.filenameFromUrl(url));
+      }
+      webView.loadUrl(url);
+      getActivity().invalidateOptionsMenu();
+    } else {
+      loadApod(Date.fromCalendar(Calendar.getInstance()));
     }
-    webView.loadUrl(url);
+
   }
 
   /**
@@ -189,53 +200,11 @@ public class ImageFragment extends Fragment {
     return (NavActivity) getActivity();
   }
 
-  private String filenameFromUrl(String url) {
-    String[] parts = url.split("\\?")[0].split("/");
-    return parts[parts.length - 1];
-  }
-
-  @Nullable
-  private String urlFromFilename(String filename) {
-    try {
-      return "file://" + new File(getContext().getFilesDir(), filename).toString();
-    } catch (NullPointerException e) {
-      Log.e(getClass().getSimpleName(), NO_PRIVATE_STORAGE_ERROR, e);
-      return null;
-    }
-  }
-
   private void saveIfNeeded(Apod apod) {
-    try {
-      if (apod.isMediaImage() && !fileExists(filenameFromUrl(apod.getUrl()))) {
-        saveImage(apod);
-      }
-    } catch (IOException | NullPointerException e) {
-      Log.e(getClass().getSimpleName(), SAVE_ERROR_LOG_MESSAGE, e);
-    }
-  }
-
-  private void saveImage(Apod apod) throws IOException, NullPointerException {
-    URL url = new URL(apod.getUrl());
-    String filename = filenameFromUrl(apod.getUrl());
-    URLConnection connection = url.openConnection();
-    try (
-        OutputStream output = getContext().openFileOutput(filename, Context.MODE_PRIVATE);
-        InputStream input = connection.getInputStream()
-    ) {
-      byte[] buffer = new byte[BUFFER_SIZE];
-      int bytesRead;
-      while ((bytesRead = input.read(buffer)) > -1) {
-        output.write(buffer, 0, bytesRead);
-      }
-    }
-  }
-
-  private boolean fileExists(String filename) {
-    try {
-      return new File(getContext().getFilesDir(), filename).exists();
-    } catch (NullPointerException e) {
-      Log.e(getClass().getSimpleName(), NO_PRIVATE_STORAGE_ERROR, e);
-      return false;
+    FileStorageService service = FileStorageService.getInstance();
+    String filename = service.filenameFromUrl(apod.getUrl());
+    if (apod.isMediaImage() && !service.internalFileExists(filename)) {
+      service.downloadToFile(apod.getUrl(), true);
     }
   }
 
@@ -248,6 +217,19 @@ public class ImageFragment extends Fragment {
   private void showFailure() {
     getNavActivity().getLoading().setVisibility(View.GONE);
     Toast.makeText(getContext(), R.string.error_message, Toast.LENGTH_LONG).show();
+  }
+
+  private void deleteApod(Apod apod) {
+    FileStorageService service = FileStorageService.getInstance();
+    new DeleteApodTask()
+        .setTransformer((v) -> {
+          service.deleteInternalFile(service.filenameFromUrl(apod.getUrl()));
+          return null;
+        })
+        .setSuccessListener((v) -> {
+          setApod(null);
+        })
+        .execute(apod);
   }
 
 }

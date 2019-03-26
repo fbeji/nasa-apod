@@ -5,12 +5,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
+import edu.cnm.deepdive.android.BaseFluentAsyncTask;
 import edu.cnm.deepdive.nasaapod.R;
 import edu.cnm.deepdive.nasaapod.model.entity.Access;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
@@ -19,8 +21,10 @@ import edu.cnm.deepdive.nasaapod.service.ApodDBService.DeleteApodTask;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.InsertAccessTask;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectAllApodTask;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectAllApodWithAccessesTask;
+import edu.cnm.deepdive.nasaapod.service.FileStorageService;
 import edu.cnm.deepdive.nasaapod.service.FragmentService;
 import edu.cnm.deepdive.nasaapod.view.HistoryAdapter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,21 +107,49 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
     }
   }
 
+  /**
+   *
+   * @param menu
+   * @param position
+   * @param apod
+   */
   public void createContextMenu(ContextMenu menu, int position, Apod apod) {
+    FileStorageService service = FileStorageService.getInstance();
     getActivity().getMenuInflater().inflate(R.menu.item_context, menu);
     menu.findItem(R.id.context_delete).setOnMenuItemClickListener((item) -> {
-      new DeleteApodTask()
-          .setSuccessListener((v) -> {
-            history.remove(position);
-            adapter.notifyItemRemoved(position);
-          })
-          .execute(apod);
+      deleteApod(apod, position);
       return true;
     });
+    MenuItem download = menu.findItem(R.id.context_download);
+    if (apod.isMediaImage()) {
+      download.setOnMenuItemClickListener((item) -> {
+        ((NavActivity) getActivity()).downloadApod(apod);
+        return true;
+      });
+    } else {
+      download.setEnabled(false).setVisible(false);
+    }
     menu.findItem(R.id.context_info).setOnMenuItemClickListener((item) -> {
       ((NavActivity) getActivity()).showFullInfo(apod);
       return true;
     });
+  }
+
+  private void deleteApod(Apod apod, int position) {
+    FileStorageService service = FileStorageService.getInstance();
+    new DeleteApodTask()
+        .setTransformer((v) -> {
+          service.deleteInternalFile(service.filenameFromUrl(apod.getUrl()));
+          return null;
+        })
+        .setSuccessListener((v) -> {
+          history.remove(position);
+          adapter.notifyItemRemoved(position);
+          if (apod.equals(imageFragment.getApod())) {
+            imageFragment.setApod(null);
+          }
+        })
+        .execute(apod);
   }
 
 }

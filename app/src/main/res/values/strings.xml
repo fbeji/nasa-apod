@@ -4,8 +4,9 @@
   <string name="error_message">Unable to retrieve APOD for selected date.</string>
   <string name="title_image">Image</string>
   <string name="title_history">History</string>
-  <string name="image_info">Show info</string>
   <string name="calendar">Pick date</string>
+  <string name="image_info">Show info</string>
+  <string name="image_download">Download</string>
   <string name="context_delete">Delete</string>
   <string name="context_info">Show info</string>
 
@@ -16,5 +17,7 @@
   <string name="access_count_format">%,d</string>
   <string name="login_failure_message">Unable to sign in with provided credentials</string>
   <string name="sign_out">Sign out</string>
+  <string name="context_download">Download</string>
+  <string name="image_delete">Delete</string>
 
 </resources>

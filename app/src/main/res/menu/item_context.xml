@@ -6,6 +6,10 @@
     android:title="@string/context_info"/>
 
   <item
+    android:id="@+id/context_download"
+    android:title="@string/context_download"/>
+
+  <item
     android:id="@+id/context_delete"
     android:title="@string/context_delete"/>
 

@@ -1,4 +1,4 @@
-## Data Model
+## Data model
 
 ### Entity-Relationship Diagram
 
@@ -34,5 +34,10 @@ CREATE TABLE IF NOT EXISTS `Access` (
 
 CREATE INDEX `index_Access_apod_id` ON `Access` (
     `apod_id`
+);
+
+CREATE INDEX `index_Access_apod_id_timestamp` ON `Access` (
+    `apod_id`, 
+    `timestamp`
 );
 ```

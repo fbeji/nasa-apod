@@ -3,10 +3,23 @@
   xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <item
-    android:id="@+id/info"
+    android:id="@+id/image_download"
+    android:title="@string/image_download"
+    android:icon="@drawable/ic_download"
+    android:orderInCategory="0"
+    app:showAsAction="always"/>
+
+  <item
+    android:id="@+id/image_info"
     android:title="@string/image_info"
     android:icon="@drawable/ic_info"
     android:orderInCategory="0"
-    app:showAsAction="ifRoom"/>
+    app:showAsAction="always"/>
+
+  <item
+    android:id="@+id/image_delete"
+    android:title="@string/image_delete"
+    android:icon="@drawable/ic_delete"
+    app:showAsAction="never"/>
 
 </menu>

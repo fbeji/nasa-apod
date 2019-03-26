@@ -1,20 +1,26 @@
 package edu.cnm.deepdive.nasaapod.controller;
 
-import android.content.Intent;
+import static android.Manifest.permission.*;
+
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.BottomNavigationView.OnNavigationItemSelectedListener;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ProgressBar;
+import edu.cnm.deepdive.android.BaseFluentAsyncTask;
 import edu.cnm.deepdive.android.DateTimePickerFragment;
 import edu.cnm.deepdive.android.DateTimePickerFragment.Mode;
 import edu.cnm.deepdive.nasaapod.R;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
+import edu.cnm.deepdive.nasaapod.service.FileStorageService;
 import edu.cnm.deepdive.nasaapod.service.FragmentService;
-import edu.cnm.deepdive.nasaapod.service.GoogleSignInService;
 import edu.cnm.deepdive.util.Date;
 import java.util.Calendar;
 
@@ -28,6 +34,8 @@ import java.util.Calendar;
 public class NavActivity extends AppCompatActivity
     implements OnNavigationItemSelectedListener {
 
+  private static final int REQUEST_WRITE_EXTERNAL_PERMISSION = 1000;
+
   private ImageFragment imageFragment;
   private HistoryFragment historyFragment;
   private ProgressBar loading;
@@ -39,6 +47,18 @@ public class NavActivity extends AppCompatActivity
     setContentView(R.layout.activity_nav);
     loading = findViewById(R.id.loading);
     setupFragments(savedInstanceState);
+    checkPermissions();
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    if (requestCode == REQUEST_WRITE_EXTERNAL_PERMISSION) {
+      if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+        finish(); // TODO Something better!
+      }
+    }
   }
 
   @Override
@@ -70,9 +90,6 @@ public class NavActivity extends AppCompatActivity
     switch (item.getItemId()) {
       case R.id.calendar:
         pickApodDate();
-        break;
-      case R.id.sign_out:
-        signOut();
         break;
       default:
         handled = super.onOptionsItemSelected(item);
@@ -112,6 +129,24 @@ public class NavActivity extends AppCompatActivity
     fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());
   }
 
+  private void checkPermissions() {
+    boolean needPermission = ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED ;
+    boolean needRationale =
+        ActivityCompat.shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
+    if (needPermission) {
+      if (needRationale) {
+        // Show an explanation to the user *asynchronously* -- don't block
+        // this thread waiting for the user's response! After the user
+        // sees the explanation, try again to request the permission.
+      } else {
+        // No explanation needed; request the permission
+        ActivityCompat.requestPermissions(this, new String[] {WRITE_EXTERNAL_STORAGE},
+            REQUEST_WRITE_EXTERNAL_PERMISSION);
+      }
+    }
+  }
+
   private void setupFragments(Bundle savedInstanceState) {
     navigation = findViewById(R.id.navigation);
     navigation.setOnNavigationItemSelectedListener(this);
@@ -145,15 +180,18 @@ public class NavActivity extends AppCompatActivity
         .show(getSupportFragmentManager(), DateTimePickerFragment.class.getSimpleName());
   }
 
-  private void signOut() {
-    GoogleSignInService.getInstance().getClient()
-        .signOut()
-        .addOnCompleteListener(this, (task) -> {
-          GoogleSignInService.getInstance().setAccount(null);
-          Intent intent = new Intent(this, LoginActivity.class);
-          intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-          startActivity(intent);
-        });
+  public void downloadApod(Apod apod) {
+    getLoading().setVisibility(View.VISIBLE);
+    new BaseFluentAsyncTask<Void, Void, Void, Void>()
+        .setPerformer((v) -> {
+          String url = (apod.getHdUrl() != null) ? apod.getHdUrl() : apod.getUrl();
+          FileStorageService.getInstance().downloadToFile(url, false);
+          return null;
+        })
+        .setSuccessListener((v) -> {
+          getLoading().setVisibility(View.GONE);
+        })
+        .execute();
   }
 
 }

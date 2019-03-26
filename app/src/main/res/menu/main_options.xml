@@ -8,11 +8,6 @@
     android:title="@string/calendar"
     android:icon="@drawable/ic_today"
     android:orderInCategory="100"
-    app:showAsAction="ifRoom"/>
-
-  <item
-    android:id="@+id/sign_out"
-    android:title="@string/sign_out"
-    app:showAsAction="never"/>
+    app:showAsAction="always"/>
 
 </menu>
