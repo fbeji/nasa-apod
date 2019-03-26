@@ -107,11 +107,19 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
     }
   }
 
+  @Override
+  public boolean onContextItemSelected(MenuItem item) {
+    return super.onContextItemSelected(item);
+  }
+
   /**
+   * Creates a context menu for the specified {@link Apod} instance at the given
+   * <code>position</code> in the recycler view. Depending on the APOD media content, the
+   * <strong>Download</strong> menu item may be disabled &amp; hidden.
    *
-   * @param menu
-   * @param position
-   * @param apod
+   * @param menu context menu to which items will be added.
+   * @param position position in recycler view of context {@link Apod} instance.
+   * @param apod context {@link Apod} instance.
    */
   public void createContextMenu(ContextMenu menu, int position, Apod apod) {
     FileStorageService service = FileStorageService.getInstance();
@@ -139,7 +147,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
     FileStorageService service = FileStorageService.getInstance();
     new DeleteApodTask()
         .setTransformer((v) -> {
-          service.deleteInternalFile(service.filenameFromUrl(apod.getUrl()));
+          service.deleteInternalFile(getContext(), service.filenameFromUrl(apod.getUrl()));
           return null;
         })
         .setSuccessListener((v) -> {

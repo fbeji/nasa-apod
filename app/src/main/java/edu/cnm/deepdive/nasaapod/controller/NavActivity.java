@@ -56,7 +56,9 @@ public class NavActivity extends AppCompatActivity
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     if (requestCode == REQUEST_WRITE_EXTERNAL_PERMISSION) {
       if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-        finish(); // TODO Something better!
+        boolean needRationale =
+            ActivityCompat.shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
+        // TODO Present rationale.
       }
     }
   }
@@ -129,21 +131,30 @@ public class NavActivity extends AppCompatActivity
     fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());
   }
 
+  /**
+   * Downloads the media content of an {@link Apod} instance, saving it to external storage.
+   *
+   * @param apod instance with URL referencing media content.
+   */
+  public void downloadApod(Apod apod) {
+    getLoading().setVisibility(View.VISIBLE);
+    new BaseFluentAsyncTask<Void, Void, Void, Void>()
+        .setPerformer((v) -> {
+          String url = (apod.getHdUrl() != null) ? apod.getHdUrl() : apod.getUrl();
+          FileStorageService.getInstance().downloadToFile(url, null);
+          return null;
+        })
+        .setSuccessListener((v) -> {
+          getLoading().setVisibility(View.GONE);
+        })
+        .execute();
+  }
+
   private void checkPermissions() {
-    boolean needPermission = ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
-        != PackageManager.PERMISSION_GRANTED ;
-    boolean needRationale =
-        ActivityCompat.shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
-    if (needPermission) {
-      if (needRationale) {
-        // Show an explanation to the user *asynchronously* -- don't block
-        // this thread waiting for the user's response! After the user
-        // sees the explanation, try again to request the permission.
-      } else {
-        // No explanation needed; request the permission
-        ActivityCompat.requestPermissions(this, new String[] {WRITE_EXTERNAL_STORAGE},
-            REQUEST_WRITE_EXTERNAL_PERMISSION);
-      }
+    if (ContextCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE},
+          REQUEST_WRITE_EXTERNAL_PERMISSION);
     }
   }
 
@@ -178,20 +189,6 @@ public class NavActivity extends AppCompatActivity
         .setCalendar(calendar)
         .setOnChangeListener((cal) -> imageFragment.loadApod(Date.fromCalendar(cal)))
         .show(getSupportFragmentManager(), DateTimePickerFragment.class.getSimpleName());
-  }
-
-  public void downloadApod(Apod apod) {
-    getLoading().setVisibility(View.VISIBLE);
-    new BaseFluentAsyncTask<Void, Void, Void, Void>()
-        .setPerformer((v) -> {
-          String url = (apod.getHdUrl() != null) ? apod.getHdUrl() : apod.getUrl();
-          FileStorageService.getInstance().downloadToFile(url, false);
-          return null;
-        })
-        .setSuccessListener((v) -> {
-          getLoading().setVisibility(View.GONE);
-        })
-        .execute();
   }
 
 }

@@ -16,7 +16,8 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- *
+ * Encapsulates several operations on files in internal and external storage, including writing
+ * data from remote URLs to local files.
  */
 public class FileStorageService {
 
@@ -29,7 +30,8 @@ public class FileStorageService {
   }
 
   /**
-   * Returns the single instance of {@link FileStorageService}.
+   * Returns the single instance of {@link FileStorageService}. Operations on external files use
+   * public storage in the {@link Environment#DIRECTORY_PICTURES} directory.
    *
    * @return instance.
    */
@@ -37,12 +39,13 @@ public class FileStorageService {
     return InstanceHolder.INSTANCE;
   }
 
-  private OutputStream openInternalFile(String filename) throws FileNotFoundException {
-    return ApodApplication.getInstance().openFileOutput(filename, Context.MODE_PRIVATE);
+  private OutputStream openInternalFile(Context context, String filename)
+      throws FileNotFoundException {
+    return context.openFileOutput(filename, Context.MODE_PRIVATE);
   }
 
   private OutputStream openExternalFile(String filename) throws FileNotFoundException {
-    return new FileOutputStream(getExternalPicturePath(filename));
+    return new FileOutputStream(getExternalPicturePath(filename), false);
   }
 
   private File getExternalPicturePath(String filename) {
@@ -52,10 +55,18 @@ public class FileStorageService {
     return file;
   }
 
+  /**
+   * Constructs a <code>file://</code> URL from a file name, presumed relative to the base directory
+   * of the app's internal storage. No check of the specified file's existence is performed.
+   *
+   * @param context runtime app context used for internal storage resolution.
+   * @param filename name of the file for which a URL is to be constructed.
+   * @return <code>file://</code>-scheme URL.
+   */
   @Nullable
-  public String internalUrlFromFilename(String filename) {
+  public String internalUrlFromFilename(Context context, String filename) {
     try {
-      return "file://" + new File(ApodApplication.getInstance().getFilesDir(), filename).toString();
+      return "file://" + new File(context.getFilesDir(), filename).toString();
     } catch (NullPointerException e) {
       Log.e(getClass().getSimpleName(), NO_PRIVATE_STORAGE_ERROR, e);
       return null;
@@ -63,13 +74,16 @@ public class FileStorageService {
   }
 
   /**
+   * Checks for the existence of the specified file, relative to the base directory of the app's
+   * internal storage.
    *
-   * @param filename
-   * @return
+   * @param context runtime app context used for internal storage resolution.
+   * @param filename name of file to check for.
+   * @return <code>true</code> if a file by the specified name exists, <code>false</code> otherwise.
    */
-  public boolean internalFileExists(String filename) {
+  public boolean internalFileExists(Context context, String filename) {
     try {
-      return new File(ApodApplication.getInstance().getFilesDir(), filename).exists();
+      return new File(context.getFilesDir(), filename).exists();
     } catch (NullPointerException e) {
       Log.e(getClass().getSimpleName(), NO_PRIVATE_STORAGE_ERROR, e);
       return false;
@@ -77,34 +91,45 @@ public class FileStorageService {
   }
 
   /**
+   * Deletes the specified file from the base directory of the app's internal storage.
    *
-   * @param filename
+   * @param context runtime app context used for internal storage resolution.
+   * @param filename name of file to delete.
    */
-  public void deleteInternalFile(String filename) {
-    ApodApplication.getInstance().deleteFile(filename);
+  public void deleteInternalFile(Context context, String filename) {
+    context.deleteFile(filename);
   }
 
   /**
+   * Extracts and returns the final component of the path portion of a URL, regardless of scheme.
+   * Note that if the path portion of <code>url</code> ends with the forward slash character ("/"),
+   * an empty string is returned.
    *
-   * @param url
-   * @return
+   * @param url URL from which filename is to be extracted.
+   * @return base filename.
    */
   public String filenameFromUrl(String url) {
-    String[] parts = url.split("\\?")[0].split("/");
+    String[] parts = url.split("[?#]")[0].split("/");
     return parts[parts.length - 1];
   }
 
   /**
+   * Reads content from a URL, writing it to a file in internal or external storage. No attempt is
+   * made to validate or otherwise process the content. The name of the file created is extracted
+   * from the URL, using {@link #filenameFromUrl(String)}.
    *
-   * @param url
-   * @param internal
+   * @param url content source.
+   * @param context runtime app context used for internal storage; <code>null</code> if external
+   * storage should be used.
    */
-  public void downloadToFile(String url, boolean internal) {
+  public void downloadToFile(String url, Context context) {
     try {
       String filename = filenameFromUrl(url);
       URLConnection connection = new URL(url).openConnection();
       try (
-          OutputStream output = internal ? openInternalFile(filename) : openExternalFile(filename);
+          OutputStream output = (context != null)
+              ? openInternalFile(context, filename)
+              : openExternalFile(filename);
           InputStream input = connection.getInputStream()
       ) {
         byte[] buffer = new byte[BUFFER_SIZE];
@@ -112,7 +137,7 @@ public class FileStorageService {
         while ((bytesRead = input.read(buffer)) > -1) {
           output.write(buffer, 0, bytesRead);
         }
-        if (!internal) {
+        if (context != null) {
           File file = getExternalPicturePath(filename);
           MediaScannerConnection.scanFile(ApodApplication.getInstance(),
               new String[]{file.toString()}, null, (path, uri) -> {

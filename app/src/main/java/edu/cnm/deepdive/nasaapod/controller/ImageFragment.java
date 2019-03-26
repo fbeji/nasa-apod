@@ -116,8 +116,9 @@ public class ImageFragment extends Fragment {
       this.apod = apod;
       getNavActivity().getLoading().setVisibility(View.VISIBLE);
       String url = apod.getUrl();
-      if (apod.isMediaImage() && service.internalFileExists(service.filenameFromUrl(url))) {
-        url = service.internalUrlFromFilename(service.filenameFromUrl(url));
+      if (apod.isMediaImage()
+          && service.internalFileExists(getContext(), service.filenameFromUrl(url))) {
+        url = service.internalUrlFromFilename(getContext(), service.filenameFromUrl(url));
       }
       webView.loadUrl(url);
       getActivity().invalidateOptionsMenu();
@@ -203,8 +204,9 @@ public class ImageFragment extends Fragment {
   private void saveIfNeeded(Apod apod) {
     FileStorageService service = FileStorageService.getInstance();
     String filename = service.filenameFromUrl(apod.getUrl());
-    if (apod.isMediaImage() && !service.internalFileExists(filename)) {
-      service.downloadToFile(apod.getUrl(), true);
+    if (apod.isMediaImage()
+        && !service.internalFileExists(getContext(), filename)) {
+      service.downloadToFile(apod.getUrl(), getContext());
     }
   }
 
@@ -223,7 +225,7 @@ public class ImageFragment extends Fragment {
     FileStorageService service = FileStorageService.getInstance();
     new DeleteApodTask()
         .setTransformer((v) -> {
-          service.deleteInternalFile(service.filenameFromUrl(apod.getUrl()));
+          service.deleteInternalFile(getContext(), service.filenameFromUrl(apod.getUrl()));
           return null;
         })
         .setSuccessListener((v) -> {
