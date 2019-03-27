@@ -22,6 +22,11 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import java.util.Calendar;
 
+/**
+ * Enscapsulates a record of a user retrieval of an {@link Apod} instance. Currently, these records
+ * are used for informational purposes in the app, and to maintain a <em>most recently used</em>
+ * (MRU) list of APOD records, for managing local storage usage.
+ */
 @Entity(
     foreignKeys = @ForeignKey(
         entity = Apod.class,

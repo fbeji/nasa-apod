@@ -16,6 +16,8 @@
 package edu.cnm.deepdive.nasaapod.controller;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,15 +33,15 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+import edu.cnm.deepdive.android.BaseFluentAsyncTask;
 import edu.cnm.deepdive.nasaapod.R;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.DeleteApodTask;
-import edu.cnm.deepdive.nasaapod.service.ApodDBService.InsertApodTask;
-import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectApodTask;
-import edu.cnm.deepdive.nasaapod.service.ApodWebService.GetFromNasaTask;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.InsertAccessTask;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectMRUApodTask;
 import edu.cnm.deepdive.nasaapod.service.FileStorageService;
-import edu.cnm.deepdive.util.Date;
-import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Populates a {@link WebView} with the image or video URL of the APOD for the currently rselected
@@ -52,6 +54,7 @@ public class ImageFragment extends Fragment {
 
   private WebView webView;
   private Apod apod;
+  private Apod savedApod;
   private HistoryFragment historyFragment;
 
   @Override
@@ -67,9 +70,11 @@ public class ImageFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_image, container, false);
     setupWebView(view);
     if (savedInstanceState != null) {
-      apod = (Apod) savedInstanceState.getSerializable(APOD_KEY);
+      savedApod = (Apod) savedInstanceState.getSerializable(APOD_KEY);
+      if (savedApod != null) {
+        setApod(savedApod);
+      }
     }
-    setApod(apod);
     return view;
   }
 
@@ -88,7 +93,7 @@ public class ImageFragment extends Fragment {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     boolean handled = true;
-    switch(item.getItemId()) {
+    switch (item.getItemId()) {
       case R.id.image_info:
         getNavActivity().showFullInfo(apod);
         break;
@@ -125,21 +130,21 @@ public class ImageFragment extends Fragment {
    * @param apod current {@link Apod} instance.
    */
   public void setApod(Apod apod) {
-    if (apod != null) {
-      FileStorageService service = FileStorageService.getInstance();
-      this.apod = apod;
-      getNavActivity().getLoading().setVisibility(View.VISIBLE);
-      String url = apod.getUrl();
-      if (apod.isMediaImage()
-          && service.internalFileExists(getContext(), service.filenameFromUrl(url))) {
-        url = service.internalUrlFromFilename(getContext(), service.filenameFromUrl(url));
-      }
-      webView.loadUrl(url);
-      getActivity().invalidateOptionsMenu();
-    } else {
-      loadApod(Date.fromCalendar(Calendar.getInstance()));
+    this.apod = apod;
+    getNavActivity().showLoading(true);
+    new BaseFluentAsyncTask<Void, Void, String, String>()
+        .setPerformer((ignore) -> locate(apod))
+        .setSuccessListener((url) -> webView.loadUrl(url))
+        .execute();
+    if (!isHidden() && apod != savedApod) {
+      new InsertAccessTask()
+          .setTransformer((access) -> {
+            keepMRU();
+            return access;
+          })
+          .execute(apod);
     }
-
+    getActivity().invalidateOptionsMenu();
   }
 
   /**
@@ -153,38 +158,6 @@ public class ImageFragment extends Fragment {
     this.historyFragment = historyFragment;
   }
 
-  /**
-   * Loads {@link Apod} instance for specified {@link Date} from local database, or&mdash;if the
-   * {@link Apod} for the specified date is not stored locally&mdash;requests it from the NASA APOD
-   * web service.
-   *
-   * @param date desired {@link Apod} date.
-   */
-  public void loadApod(Date date) {
-    getNavActivity().getLoading().setVisibility(View.VISIBLE);
-    new SelectApodTask()
-        .setTransformer((apod) -> {
-          saveIfNeeded(apod);
-          return apod;
-        })
-        .setSuccessListener(this::setApod)
-        .setFailureListener((nullApod) -> {
-          new GetFromNasaTask()
-              .setTransformer((apod) -> {
-                new InsertApodTask(isVisible()).execute(apod);
-                saveIfNeeded(apod);
-                return apod;
-              })
-              .setSuccessListener((apod) -> {
-                historyFragment.refresh();
-                setApod(apod);
-              })
-              .setFailureListener((anotherNullApod) -> showFailure())
-              .execute(date);
-        })
-        .execute(date);
-  }
-
   @SuppressLint("SetJavaScriptEnabled")
   private void setupWebView(View view) {
     webView = view.findViewById(R.id.web_view);
@@ -196,7 +169,7 @@ public class ImageFragment extends Fragment {
 
       @Override
       public void onPageFinished(WebView view, String url) {
-        getNavActivity().getLoading().setVisibility(View.GONE);
+        getNavActivity().showLoading(false);
         if (isVisible()) {
           showInfo();
         }
@@ -215,15 +188,6 @@ public class ImageFragment extends Fragment {
     return (NavActivity) getActivity();
   }
 
-  private void saveIfNeeded(Apod apod) {
-    FileStorageService service = FileStorageService.getInstance();
-    String filename = service.filenameFromUrl(apod.getUrl());
-    if (apod.isMediaImage()
-        && !service.internalFileExists(getContext(), filename)) {
-      service.downloadToFile(apod.getUrl(), getContext());
-    }
-  }
-
   private void showInfo() {
     if (apod != null && isVisible()) {
       Toast.makeText(getContext(), apod.getTitle(), Toast.LENGTH_LONG).show();
@@ -231,7 +195,7 @@ public class ImageFragment extends Fragment {
   }
 
   private void showFailure() {
-    getNavActivity().getLoading().setVisibility(View.GONE);
+    getNavActivity().showLoading(false);
     Toast.makeText(getContext(), R.string.error_message, Toast.LENGTH_LONG).show();
   }
 
@@ -239,13 +203,45 @@ public class ImageFragment extends Fragment {
     FileStorageService service = FileStorageService.getInstance();
     new DeleteApodTask()
         .setTransformer((v) -> {
-          service.deleteInternalFile(getContext(), service.filenameFromUrl(apod.getUrl()));
+          service.deleteFile(getContext(), service.filenameFromUrl(apod.getUrl()));
           return null;
         })
         .setSuccessListener((v) -> {
           setApod(null);
         })
         .execute(apod);
+  }
+
+  private String locate(Apod apod) {
+    String url = apod.getUrl();
+    if (apod.isMediaImage()) {
+      Context context = getContext();
+      FileStorageService service = FileStorageService.getInstance();
+      String filename = service.filenameFromUrl(apod.getUrl());
+      if (!service.fileExists(context, filename)) {
+        url = service.download(apod.getUrl(), context);
+      }
+    }
+    return url;
+  }
+
+  private void keepMRU() {
+    SharedPreferences settings = getActivity().getPreferences(Context.MODE_PRIVATE);
+    int mruCacheSize = settings.getInt(SettingsFragment.MRU_CACHE_SIZE_KEY, 0);
+    if (mruCacheSize > 0) {
+      Context context = getContext();
+      FileStorageService service = FileStorageService.getInstance();
+      new SelectMRUApodTask()
+          .setTransformer((mru) -> {
+            Set<String> filenames = new HashSet<>();
+            for (Apod a : mru) {
+              filenames.add(service.filenameFromUrl(a.getUrl()));
+            }
+            service.keepInternalFiles(context, filenames);
+            return mru;
+          })
+          .execute(mruCacheSize);
+    }
   }
 
 }

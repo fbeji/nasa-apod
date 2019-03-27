@@ -2,7 +2,7 @@
 
 This app is intended to be a convenient, user-friendly way to view and download NASA's Astronomy Picture of the Day (APOD) content. 
 
-I've enjoyed the APOD content for several years, but have found it relatively inconvenient to use with a general-purpose internet browser&mdash;especially when downloading content for use as wallpaper, etc. My aim in designing and building this app is not only to provide a simplified (but effective) user interface to the NASA APOD service, but also to illustrate a number of features, components, and techniques that are (in my opinion) useful to new Android developers, as they learn to develop apps for that platform&mdash;such as
+I've enjoyed the APOD content for several years, but have found it relatively inconvenient to use with a general-purpose internet browser&mdash;especially when downloading content for use as wallpaper, etc. My aim in designing and building this app is not only to provide a simplified (but still effective) user interface to the NASA APOD service, but also to illustrate a number of features, components, and techniques that are (in my opinion) useful to new Android developers, as they learn to develop apps for that platform:
 
 * Consuming web services with Retrofit &amp; OkHttp.
 * Deserializing JSON data with Gson & the Retrofit Gson converter.
@@ -33,7 +33,8 @@ Note that the Stetho inspection features are currently still enabled; for a prod
 * Load APOD for current &amp; selected dates.
 * Change orientation.
 * Download APOD image.
-* Delete APOD for current &amp; selected dates. 
+* Delete APOD for current &amp; selected dates.
+* Modify the most-recently-used (MRU) file cache size.
 
 ### Environments
 
@@ -42,24 +43,20 @@ Note that the Stetho inspection features are currently still enabled; for a prod
 ##### Amazon Fire HD 8 7<sup>th</sup> Generation (Fire OS 5.3.6.4), Android 5.1.1 (API 22)
 
 * No issues observed.
-* No explicit permission request appears (as expected).
 
 ##### LG Q7+, Android 8.1 (API 27)
 
 * Difficulty in getting a clean install of debug APK; appears to be a device configuration issue.
 * No issues observed after full uninstall &amp; re-install.
-* Explicit permission request appears (as expected).
 
 #### Emulators
 
 ##### Pixel 2 XL (API 28)
 
-* Explicit permission request appears (as expected).
 * Orientation changes don't appear to be detected in emulator (not specific to this app).
 
 ##### Nexus 5X (API 24)
 
-* No explicit permission request appears (as expected).
 * Orientation changes detected unreliably (not specific to this app).
 * Video doesn't play (not specific to this app).  
 
@@ -103,6 +100,10 @@ The only external service currently used in the app is (of course) the [NASA APO
 
 * Modify deletion feature so that only cached media content&mdash;not title &amp; other metadata&mdash;is deleted.
 
+* Add filter for limiting the range of dates displayed in the history view.
+
+* Implement reactive/live connection between database and history view.
+
 ### Cosmetic improvements
 
 * Modify history display to indicate the existence of cached media content.  
@@ -127,7 +128,12 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-### [3<sup>rd</sup>-party copyright &amp; license notices](docs/notice.md) 
+### [Full (including 3<sup>rd</sup>-party) copyright &amp; license notices](docs/notice.md) 
+
+### Official text of applicable licenses
+
+* [Apache License, Version 2.0](docs/licenses/apache-2.0.txt)
+* [MIT License](docs/licenses/mit.txt)
 
 ## Instructions
 

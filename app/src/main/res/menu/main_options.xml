@@ -5,9 +5,20 @@
 
   <item
     android:id="@+id/calendar"
-    android:title="@string/calendar"
+    android:title="@string/main_calendar"
     android:icon="@drawable/ic_today"
     android:orderInCategory="100"
     app:showAsAction="always"/>
+
+  <group
+    android:orderInCategory="100">
+
+    <item
+      android:id="@+id/settings"
+      android:title="@string/main_settings"
+      android:orderInCategory="100"
+      app:showAsAction="never"/>
+
+  </group>
 
 </menu>

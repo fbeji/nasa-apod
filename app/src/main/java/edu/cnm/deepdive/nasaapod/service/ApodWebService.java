@@ -29,6 +29,8 @@ import edu.cnm.deepdive.android.BaseFluentAsyncTask;
 import edu.cnm.deepdive.nasaapod.ApodApplication;
 import edu.cnm.deepdive.nasaapod.BuildConfig;
 import edu.cnm.deepdive.nasaapod.R;
+import edu.cnm.deepdive.nasaapod.model.ApodDB;
+import edu.cnm.deepdive.nasaapod.model.dao.ApodDao;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
 import edu.cnm.deepdive.util.Date;
 import java.io.IOException;
@@ -95,7 +97,6 @@ public interface ApodWebService {
 
     @Override
     protected Apod perform(Date... dates) throws TaskException {
-      Apod apod = null;
       try {
         @SuppressLint("SimpleDateFormat") DateFormat format =
             new SimpleDateFormat(InstanceHolder.DATE_FORMAT);

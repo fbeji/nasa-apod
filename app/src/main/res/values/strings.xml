@@ -4,20 +4,28 @@
   <string name="error_message">Unable to retrieve APOD for selected date.</string>
   <string name="title_image">Image</string>
   <string name="title_history">History</string>
-  <string name="calendar">Pick date</string>
+
+  <string name="main_settings">Settings</string>
+  <string name="main_calendar">Pick date</string>
+
   <string name="image_info">Show info</string>
   <string name="image_download">Download</string>
-  <string name="context_delete">Delete</string>
+  <string name="image_delete">Delete</string>
+
   <string name="context_info">Show info</string>
+  <string name="context_download">Download</string>
+  <string name="context_delete">Delete</string>
 
   <string name="url_label">URL:</string>
   <string name="hd_url_label">HD URL:</string>
   <string name="positive_label">OK</string>
 
   <string name="access_count_format">%,d</string>
-  <string name="login_failure_message">Unable to sign in with provided credentials</string>
-  <string name="sign_out">Sign out</string>
-  <string name="context_download">Download</string>
-  <string name="image_delete">Delete</string>
+
+  <string name="cache_size_label">Images to keep in local cache</string>
+  <string name="unlimited">Unlimited</string>
+  <string name="current">Current image only</string>
+  <string name="title_settings">Settings</string>
+  <string name="negative_label">Cancel</string>
 
 </resources>

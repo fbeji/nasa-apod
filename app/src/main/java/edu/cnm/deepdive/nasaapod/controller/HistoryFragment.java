@@ -20,26 +20,21 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
-import edu.cnm.deepdive.android.BaseFluentAsyncTask;
 import edu.cnm.deepdive.nasaapod.R;
 import edu.cnm.deepdive.nasaapod.model.entity.Access;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
-import edu.cnm.deepdive.nasaapod.model.pojo.ApodWithAccesses;
+import edu.cnm.deepdive.nasaapod.model.pojo.ApodWithAccessCount;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.DeleteApodTask;
 import edu.cnm.deepdive.nasaapod.service.ApodDBService.InsertAccessTask;
-import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectAllApodTask;
-import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectAllApodWithAccessesTask;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService.SelectAllApodWithAccessCountTask;
 import edu.cnm.deepdive.nasaapod.service.FileStorageService;
 import edu.cnm.deepdive.nasaapod.service.FragmentService;
 import edu.cnm.deepdive.nasaapod.view.HistoryAdapter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +44,7 @@ import java.util.List;
  */
 public class HistoryFragment extends Fragment implements View.OnClickListener {
 
-  private List<ApodWithAccesses> history;
+  private List<ApodWithAccessCount> history;
   private HistoryAdapter adapter;
   private ImageFragment imageFragment;
 
@@ -89,12 +84,11 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
   public void onClick(View view) {
     Apod apod = (Apod) view.getTag();
     NavActivity activity = ((NavActivity) getActivity());
-    FragmentService.getInstance().showFragment(activity, R.id.fragment_container, imageFragment);
-    Access access = new Access();
-    access.setApodId(apod.getId());
-    new InsertAccessTask().execute(access);
-    imageFragment.setApod(apod);
-    activity.getNavigation().setSelectedItemId(R.id.navigation_image);
+    FragmentService.getInstance()
+        .getShowFragmentTransaction(activity, R.id.fragment_container, imageFragment)
+        .runOnCommit(() -> imageFragment.setApod(apod))
+        .commit();
+    activity.setSelectedNavigationItemId(R.id.navigation_image);
   }
 
   /**
@@ -112,11 +106,12 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
    */
   public void refresh() {
     if (!isHidden()) {
-      new SelectAllApodWithAccessesTask()
+      new SelectAllApodWithAccessCountTask()
           .setSuccessListener((apods) -> {
             history.clear();
             history.addAll(apods);
             adapter.notifyDataSetChanged();
+            ((NavActivity) getActivity()).showLoading(false);
           })
           .execute();
     }
@@ -162,7 +157,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
     FileStorageService service = FileStorageService.getInstance();
     new DeleteApodTask()
         .setTransformer((v) -> {
-          service.deleteInternalFile(getContext(), service.filenameFromUrl(apod.getUrl()));
+          service.deleteFile(getContext(), service.filenameFromUrl(apod.getUrl()));
           return null;
         })
         .setSuccessListener((v) -> {

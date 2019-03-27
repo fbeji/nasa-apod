@@ -20,6 +20,7 @@ import edu.cnm.deepdive.android.BaseFluentAsyncTask;
 import edu.cnm.deepdive.nasaapod.model.ApodDB;
 import edu.cnm.deepdive.nasaapod.model.entity.Access;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
+import edu.cnm.deepdive.nasaapod.model.pojo.ApodWithAccessCount;
 import edu.cnm.deepdive.nasaapod.model.pojo.ApodWithAccesses;
 import edu.cnm.deepdive.util.Date;
 import java.util.LinkedList;
@@ -35,45 +36,25 @@ public final class ApodDBService {
   }
 
   /**
-   * Implements an asynchronous <code>INSERT</code> of one or more {@link Apod} instances, with
-   * related {@link Access} instances, into the local database.
+   * Implements an asynchronous <code>INSERT</code> of an {@link Apod} instance into the local
+   * database.
    */
   public static class InsertApodTask
-      extends BaseFluentAsyncTask<Apod, Void, List<Long>, List<Long>> {
-
-    private boolean foreground;
-
-    /**
-     * Initializes <code>INSERT</code> task with <code>foreground</code> indicating intention to
-     * present image immediately in user interface
-     *
-     * @param foreground <code>true</code> if image will be displayed immediately;
-     * <code>false</code> otherwise.
-     */
-    public InsertApodTask(boolean foreground) {
-      this.foreground = foreground;
-    }
+      extends BaseFluentAsyncTask<Apod, Void, Apod, Apod> {
 
     @Override
-    protected List<Long> perform(Apod... apods) {
-      List<Long> apodIds = ApodDB.getInstance().getApodDao().insert(apods);
-      if (foreground) {
-        List<Access> accesses = new LinkedList<>();
-        for (long id : apodIds) {
-          Access access = new Access();
-          access.setApodId(id);
-          accesses.add(access);
-        }
-        ApodDB.getInstance().getAccessDao().insert(accesses);
-      }
-      return apodIds;
+    protected Apod perform(Apod... apods) {
+      Apod apod = apods[0];
+      long id = ApodDB.getInstance().getApodDao().insert(apods[0]);
+      apod.setId(id);
+      return apod;
     }
 
   }
 
   /**
-   * Implements an asynchronous <code>SELECT</code> of a single {@link Apod} instance, and an
-   * <code>INSERT</code> of a related {@link Access} instance, in the local database.
+   * Implements an asynchronous <code>SELECT</code> of a single {@link Apod} instance from the local
+   * database.
    */
   public static class SelectApodTask extends BaseFluentAsyncTask<Date, Void, Apod, Apod> {
 
@@ -83,9 +64,6 @@ public final class ApodDBService {
       if (apod == null) {
         throw new TaskException();
       }
-      Access access = new Access();
-      access.setApodId(apod.getId());
-      ApodDB.getInstance().getAccessDao().insert(access);
       return apod;
     }
 
@@ -105,12 +83,45 @@ public final class ApodDBService {
 
   }
 
+  /**
+   * Implements an asynchronous <code>SELECT</code> of all {@link ApodWithAccesses} instances, each
+   * containing an embedded {@link Apod} instance and a list of related {@link Access} instances.
+   */
   public static class SelectAllApodWithAccessesTask
       extends BaseFluentAsyncTask<Void, Void, List<ApodWithAccesses>, List<ApodWithAccesses>> {
 
     @Override
     protected List<ApodWithAccesses> perform(Void... voids) {
       return ApodDB.getInstance().getApodDao().findAllWithAccesses();
+    }
+
+  }
+
+  /**
+   * Implements an asynchronous <code>SELECT</code> of all {@link ApodWithAccessCount} instances,
+   * each containing an embedded {@link Apod} instance and a count of related {@link Access}
+   * instances.
+   */
+  public static class SelectAllApodWithAccessCountTask
+      extends BaseFluentAsyncTask<Void, Void, List<ApodWithAccessCount>, List<ApodWithAccessCount>> {
+
+    @Override
+    protected List<ApodWithAccessCount> perform(Void... voids) {
+      return ApodDB.getInstance().getApodDao().findAllWithAccessCount();
+    }
+
+  }
+
+  /**
+   * Implements an asynchronous <code>SELECT</code> of the most recently accessed {@link Apod}
+   * instances (sorted in descending date order) from the local database.
+   */
+  public static class SelectMRUApodTask extends BaseFluentAsyncTask<Integer, Void, List<Apod>, List<Apod>> {
+
+    @Nullable
+    @Override
+    protected List<Apod> perform(Integer... params) throws TaskException {
+      return ApodDB.getInstance().getApodDao().findMRU(params[0]);
     }
 
   }
@@ -131,16 +142,20 @@ public final class ApodDBService {
   }
 
   /**
-   * Implements an asynchronous <code>INSERT</code> of one or more {@link Access} instances into the
-   * local database.
+   * Implements an asynchronous <code>INSERT</code> of one {@link Access} instance, referencing the
+   * specified {@link Apod} instance, into the local database.
    */
   public static class InsertAccessTask
-      extends BaseFluentAsyncTask<Access, Void, List<Long>, List<Long>> {
+      extends BaseFluentAsyncTask<Apod, Void, Apod, Apod> {
 
     @Nullable
     @Override
-    protected List<Long> perform(Access... accesses) throws TaskException {
-      return ApodDB.getInstance().getAccessDao().insert(accesses);
+    protected Apod perform(Apod... apods) throws TaskException {
+      Apod apod = apods[0];
+      Access access = new Access();
+      access.setApodId(apod.getId());
+      ApodDB.getInstance().getAccessDao().insert(access);
+      return apod;
     }
 
   }

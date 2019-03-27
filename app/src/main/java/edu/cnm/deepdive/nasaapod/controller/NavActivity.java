@@ -34,6 +34,8 @@ import edu.cnm.deepdive.android.DateTimePickerFragment;
 import edu.cnm.deepdive.android.DateTimePickerFragment.Mode;
 import edu.cnm.deepdive.nasaapod.R;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
+import edu.cnm.deepdive.nasaapod.service.ApodDBService;
+import edu.cnm.deepdive.nasaapod.service.ApodWebService;
 import edu.cnm.deepdive.nasaapod.service.FileStorageService;
 import edu.cnm.deepdive.nasaapod.service.FragmentService;
 import edu.cnm.deepdive.util.Date;
@@ -108,30 +110,21 @@ public class NavActivity extends AppCompatActivity
       case R.id.calendar:
         pickApodDate();
         break;
+      case R.id.settings:
+        editSettings();
+        break;
       default:
         handled = super.onOptionsItemSelected(item);
     }
     return handled;
   }
 
-  /**
-   * Returns a reference to the {@link BottomNavigationView} of this activity, allowing hosted
-   * fragments to get/set the selected item.
-   *
-   * @return main navigation view of this activity.
-   */
-  public BottomNavigationView getNavigation() {
-    return navigation;
+  public void setSelectedNavigationItemId(int id) {
+    navigation.setSelectedItemId(id);
   }
 
-  /**
-   * Returns a reference to the {@link ProgressBar} of this activity, allowing hosted fragments to
-   * hide/show it.
-   *
-   * @return indeterminate progress spinner.
-   */
-  public ProgressBar getLoading() {
-    return loading;
+  public void showLoading(boolean visible) {
+    loading.setVisibility(visible ? View.VISIBLE : View.GONE);
   }
 
   /**
@@ -152,15 +145,15 @@ public class NavActivity extends AppCompatActivity
    * @param apod instance with URL referencing media content.
    */
   public void downloadApod(Apod apod) {
-    getLoading().setVisibility(View.VISIBLE);
+    showLoading(true);
     new BaseFluentAsyncTask<Void, Void, Void, Void>()
         .setPerformer((v) -> {
           String url = (apod.getHdUrl() != null) ? apod.getHdUrl() : apod.getUrl();
-          FileStorageService.getInstance().downloadToFile(url, null);
+          FileStorageService.getInstance().download(url, null);
           return null;
         })
         .setSuccessListener((v) -> {
-          getLoading().setVisibility(View.GONE);
+          showLoading(false);
         })
         .execute();
   }
@@ -184,6 +177,7 @@ public class NavActivity extends AppCompatActivity
       historyFragment = new HistoryFragment();
       fragmentService.loadFragment(this, R.id.fragment_container, historyFragment,
           historyFragment.getClass().getSimpleName(), false);
+      loadApod(Date.today());
     } else {
       imageFragment = (ImageFragment) fragmentService.findFragment(
           this, R.id.fragment_container, ImageFragment.class.getSimpleName());
@@ -202,8 +196,35 @@ public class NavActivity extends AppCompatActivity
     new DateTimePickerFragment()
         .setMode(Mode.DATE)
         .setCalendar(calendar)
-        .setOnChangeListener((cal) -> imageFragment.loadApod(Date.fromCalendar(cal)))
+        .setOnChangeListener((cal) -> loadApod(Date.fromCalendar(cal)))
         .show(getSupportFragmentManager(), DateTimePickerFragment.class.getSimpleName());
+  }
+
+  private void loadApod(Date date) {
+    showLoading(true);
+    new ApodDBService.SelectApodTask()
+        .setSuccessListener(this::refresh)
+        .setFailureListener((ignore) -> {
+          new ApodWebService.GetFromNasaTask()
+              .setTransformer((apod) -> {
+                new ApodDBService.InsertApodTask()
+                    .setSuccessListener(this::refresh)
+                    .execute(apod);
+                return apod;
+              })
+              .execute(date);
+        })
+        .execute(date);
+  }
+
+  private void refresh(Apod apod) {
+    imageFragment.setApod(apod);
+    historyFragment.refresh();
+  }
+
+  private void editSettings() {
+    SettingsFragment fragment = new SettingsFragment();
+    fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());
   }
 
 }

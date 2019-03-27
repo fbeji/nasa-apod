@@ -43,19 +43,20 @@ public class FragmentService {
   }
 
   /**
-   * Attaches the specified fragment to the specified activity and container, with a specified tag.
-   * This method simply invokes {@link #loadFragment(FragmentActivity, int, Fragment, String,
-   * boolean) loadFragment(FragmentActivity, int, Fragment, String, true)}.
+   * Attaches the specified fragment to the specified activity and container, with a specified tag,
+   * in an initially visible state, and returns the not-yet-committed transaction.
    *
    * @param activity host of fragment.
    * @param containerId id of {@link android.view.ViewGroup} to which the fragment will be
    * attached.
    * @param fragment fragment to be loaded.
    * @param tag <code>String</code> identifier of fragment.
+   * @return uncommitted transaction.
    */
-  public void loadFragment(
+  public FragmentTransaction getLoadFragmentTransaction(
       FragmentActivity activity, int containerId, Fragment fragment, String tag) {
-    loadFragment(activity, containerId, fragment, tag, true);
+    return activity.getSupportFragmentManager().beginTransaction()
+        .add(containerId, fragment, tag);
   }
 
   /**
@@ -73,12 +74,54 @@ public class FragmentService {
    */
   public void loadFragment(
       FragmentActivity activity, int containerId, Fragment fragment, String tag, boolean visible) {
-    FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
-    transaction.add(containerId, fragment, tag);
+    FragmentTransaction transaction =
+        getLoadFragmentTransaction(activity, containerId, fragment, tag);
     if (!visible) {
       transaction.hide(fragment);
     }
     transaction.commit();
+  }
+
+  /**
+   * Begins, but does not commit, a transaction to make the specified fragment visible, if it is
+   * attached to the specified activity and container. Any other fragments attached to the specified
+   * activity and container are set to be hidden in the transaction.
+   *
+   * @param activity host activity.
+   * @param containerId host container.
+   * @param fragment fragment to show.
+   * @return uncommitted transaction.
+   */
+  public FragmentTransaction getShowFragmentTransaction(
+      FragmentActivity activity, int containerId, Fragment fragment) {
+    FragmentManager manager = activity.getSupportFragmentManager();
+    FragmentTransaction transaction = manager.beginTransaction();
+    for (Fragment frag : manager.getFragments()) {
+      if (frag.getId() == containerId) {
+        if (frag == fragment && !frag.isVisible()) {
+          transaction.show(frag);
+        } else if (frag != fragment && frag.isVisible()) {
+          transaction.hide(frag);
+        }
+      }
+    }
+    return transaction;
+  }
+
+  /**
+   * Begins, but does not commit, a transaction to make the specified fragment visible, if it is
+   * attached to the specified activity and container. Any other fragments attached to the specified
+   * activity and container are set to be hidden in the transaction.
+   *
+   * @param activity host activity.
+   * @param containerId host container.
+   * @param tag <code>String</code> identifier of fragment to show.
+   * @return uncommitted transaction.
+   */
+  public FragmentTransaction getShowFragmentTransaction(
+      FragmentActivity activity, int containerId, String tag) {
+    return getShowFragmentTransaction(activity, containerId,
+        findFragment(activity, containerId, tag));
   }
 
   /**
@@ -92,23 +135,21 @@ public class FragmentService {
    * @param fragment fragment to show.
    */
   public void showFragment(FragmentActivity activity, int containerId, Fragment fragment) {
-    FragmentManager manager = activity.getSupportFragmentManager();
-    FragmentTransaction transaction = manager.beginTransaction();
-    boolean modified = false;
-    for (Fragment frag : manager.getFragments()) {
-      if (frag.getId() == containerId) {
-        if (frag == fragment && !frag.isVisible()) {
-          transaction.show(frag);
-          modified = true;
-        } else if (frag != fragment && frag.isVisible()) {
-          transaction.hide(frag);
-          modified = true;
-        }
-      }
-    }
-    if (modified) {
-      transaction.commit();
-    }
+    getShowFragmentTransaction(activity, containerId, fragment).commit();
+  }
+
+  /**
+   * Makes the specified fragment visible, if it is attached to the specified activity and
+   * container. Any other fragments attached to the specified activity and container are hidden. In
+   * any event, no visibility changes will be made to fragments not attached to both the specified
+   * host activity and container.
+   *
+   * @param activity host activity.
+   * @param containerId host container.
+   * @param tag <code>String</code> identifier of fragment to show.
+   */
+  public void showFragment(FragmentActivity activity, int containerId, String tag) {
+    getShowFragmentTransaction(activity, containerId, tag).commit();
   }
 
   /**
