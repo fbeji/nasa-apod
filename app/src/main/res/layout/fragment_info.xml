@@ -13,7 +13,6 @@
 
     <TextView
       android:id="@+id/date_label"
-      android:textIsSelectable="true"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/date_label"
@@ -79,6 +78,7 @@
       android:autoLink="web"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:textIsSelectable="true"
       app:layout_constraintStart_toStartOf="@id/label_barrier"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintBaseline_toBaselineOf="@id/web_url_label"/>
@@ -88,6 +88,7 @@
       android:autoLink="web"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:textIsSelectable="true"
       app:layout_constraintStart_toStartOf="@id/label_barrier"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintBaseline_toBaselineOf="@id/url_label"/>
@@ -97,6 +98,7 @@
       android:autoLink="web"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
+      android:textIsSelectable="true"
       app:layout_constraintStart_toStartOf="@id/label_barrier"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintBaseline_toBaselineOf="@id/hd_url_label"/>
