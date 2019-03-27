@@ -67,7 +67,22 @@
 
 5. Before attempting to run, make sure you have a connected/enabled Android hardware device or emulator, running Android 5.0 (API 21) level or higher.
 
-6. Click the run button in the toolbar, or select the **Run/Run 'app'** menu command, and select your target device.
+6. To test, click the run button in the toolbar, or select the **Run/Run 'app'** menu command, and select your target device.
 
+7. To generate/re-generate the Javadoc HTML from the comments in the code (which should not be necessary), set the following options in the **Tools/Generate JavaDoc** dialog:
 
+    1. Select **Whole project** as the scope.
     
+    2. _Do not_ check the **Include test sources**, **Include JDK and library sources in -sourcepath**, and **Link to JDK documentation** options.
+    
+    3. Set the **Output directory** to the `docs/api` subdirectory of the project directory.
+    
+    4. In the generation options located below the **Output directory** field, set the slider to **`protected`**, and check all of the checkboxes.
+    
+    5. Paste the following into the **Other command line arguments** field (note that these should be pasted in as a **single line**):
+    
+        > <tt>-bootclasspath "C:\Program Files\Java\jdk1.8.0_202\jre\lib\rt.jar";C:\android\sdk\platforms\android-21\android.jar -link https://docs.oracle.com/javase/8/docs/api/ -linkoffline https://developer.android.com/reference C:\android\sdk\docs\reference -link https://google.github.io/gson/apidocs/ -link http://square.github.io/retrofit/2.x/converter-gson/ -link http://square.github.io/retrofit/2.x/retrofit/ -link https://square.github.io/okhttp/3.x/okhttp/ -link https://deep-dive-coding-java.github.io/date-utilities/docs/api/ -link https://deep-dive-coding-java.github.io/android-utilities/docs/api/ -windowtitle "NASA APOD Browser"</tt>
+        
+    6. Click **OK**.
+    
+    ![Generate Javadoc](img/generate-javadoc.png)
