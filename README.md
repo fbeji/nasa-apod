@@ -1,8 +1,8 @@
 ## Purpose
 
-This app is intended to be a convenient, user-friendly way to view and download NASA's Astronomy Picture of the Day (APOD) content. 
+This app is intended to be a convenient, user-friendly tool for viewing and downloading content published by the NASA Astronomy Picture of the Day (APOD) service. 
 
-I've enjoyed the APOD content for several years, but have found it relatively inconvenient to use with a general-purpose internet browser&mdash;especially when downloading content for use as wallpaper, etc. My aim in designing and building this app is not only to provide a simplified (but still effective) user interface to the NASA APOD service, but also to illustrate a number of features, components, and techniques that are (in my opinion) useful to new Android developers, as they learn to develop apps for that platform:
+I've enjoyed the APOD content for several years, but I still find it relatively inconvenient to use with a general-purpose internet browser&mdash;especially when downloading content for use as wallpaper, etc. My aim in designing and building this app is not only to provide a simplified (but still effective) user interface to the NASA APOD service, but also to illustrate a number of features, components, and techniques that are (in my opinion) useful to new Android developers, as they learn to develop apps for that platform:
 
 * Consuming web services with Retrofit &amp; OkHttp.
 * Deserializing JSON data with Gson & the Retrofit Gson converter.

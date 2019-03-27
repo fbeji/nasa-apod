@@ -49,19 +49,19 @@
 
     1. Select the **Run/Edit Configurations** menu command, or click the **Add Configuration** option in the toolbar at the top of the workspace:
     
-        ![Edit Configurations](edit-configurations.png)
+        ![Edit Configurations](img/edit-configurations.png)
         
     2. In the **Run/Debug Configurations** menu, click the plus sign in the upper-left, and select **Android App** from the list that appears:
     
-        ![Add Run/Debug Configuration](run-debug-configurations.png)
+        ![Add Run/Debug Configuration](img/run-debug-configurations.png)
         
     3. Set the **Name** field to "app" (without quotes), and select **app** from the **Module** pull-down selector:
     
-        ![Android App configuration](add-app-configuration.png)
+        ![Android App configuration](img/add-app-configuration.png)
         
     4. Click the **OK** button. After a few seconds the **app** option will appear in the toolbar at the top of the workspace, and the green run button next to it will be enabled:
     
-        ![App run configuration](app-run-configuration.png)
+        ![App run configuration](img/app-run-configuration.png)
         
 4. Select the **Build/Rebuild Project** menu command. Any errors reported at this point are probably due to incorrect settings selected during the import, or incorrect naming, placement, or content of the `nasa.properties` file.
 
