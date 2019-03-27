@@ -12,11 +12,41 @@
     android:layout_height="wrap_content">
 
     <TextView
+      android:id="@+id/date_label"
+      android:textIsSelectable="true"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/date_label"
+      style="@style/LinkLabel"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+      android:id="@+id/date"
+      android:textIsSelectable="true"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:layout_constraintStart_toEndOf="@id/date_label"
+      app:layout_constraintBaseline_toBaselineOf="@id/date_label"/>
+
+    <TextView
       android:id="@+id/explanation"
       android:textIsSelectable="true"
-      android:layout_width="match_parent"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      app:layout_constraintTop_toTopOf="parent"/>
+      style="@style/BodyText"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/date"/>
+
+    <TextView
+      android:id="@+id/web_url_label"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/web_url_label"
+      style="@style/LinkLabel"
+      app:layout_constraintTop_toBottomOf="@id/explanation"
+      app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
       android:id="@+id/url_label"
@@ -24,7 +54,7 @@
       android:layout_height="wrap_content"
       android:text="@string/url_label"
       style="@style/LinkLabel"
-      app:layout_constraintTop_toBottomOf="@id/explanation"
+      app:layout_constraintTop_toBottomOf="@+id/web_url"
       app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
@@ -42,22 +72,33 @@
       android:layout_height="wrap_content"
       app:barrierDirection="end"
       app:barrierAllowsGoneWidgets="false"
-      app:constraint_referenced_ids="url_label,hd_url_label"/>
+      app:constraint_referenced_ids="web_url_label,url_label,hd_url_label"/>
+
+    <TextView
+      android:id="@+id/web_url"
+      android:autoLink="web"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintStart_toStartOf="@id/label_barrier"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBaseline_toBaselineOf="@id/web_url_label"/>
 
     <TextView
       android:id="@+id/url"
       android:autoLink="web"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       app:layout_constraintStart_toStartOf="@id/label_barrier"
+      app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintBaseline_toBaselineOf="@id/url_label"/>
 
     <TextView
       android:id="@+id/hd_url"
       android:autoLink="web"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       app:layout_constraintStart_toStartOf="@id/label_barrier"
+      app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintBaseline_toBaselineOf="@id/hd_url_label"/>
 
   </android.support.constraint.ConstraintLayout>

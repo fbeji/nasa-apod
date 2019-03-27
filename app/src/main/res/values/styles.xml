@@ -53,6 +53,10 @@
     <item name="android:textStyle">bold</item>
   </style>
 
+  <style name="BodyText" parent="AppTheme">
+    <item name="android:layout_marginTop">@dimen/item_spacing</item>
+  </style>
+
   <style name="SettingsText">
     <item name="android:textSize">16sp</item>
   </style>

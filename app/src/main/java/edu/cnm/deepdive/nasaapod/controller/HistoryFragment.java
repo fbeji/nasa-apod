@@ -164,7 +164,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
           history.remove(position);
           adapter.notifyItemRemoved(position);
           if (apod.equals(imageFragment.getApod())) {
-            imageFragment.setApod(null);
+            getNavActivity().resetApod();
           }
         })
         .execute(apod);

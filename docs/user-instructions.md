@@ -22,7 +22,9 @@
         
     2. **Show info** (block letter "i" in a circle)
     
-        When this option is clicked, an information dialog is displayed, containing the APOD title, descriptive text, and links to the standard-resolution media content, and (if available) to the high-resolution media content.
+        When this option is clicked, an information dialog is displayed, containing the APOD date, title, descriptive text, and links to the corresponding web page, standard-resolution media content, and (if available) high-resolution media content.
+        
+        ![Show info](img/show-info.png)
         
     3. **Pick date** (desk calendar icon)
     
@@ -39,4 +41,9 @@
 6. The history view displays all APOD items retrieved to-date, except for those that have been deleted by the user. Each item shows the APOD date, title, and number of times the user has opened it to view the media content.
 
     ![History view](img/history-view.png)
+
+    The history view includes the same **Calendar** and **Settings** options (in the action bar and overflow menu) described for the image view (above). The other options are also available, but only via a context menu that appears when the user does a "long press" (click and hold) on an item in the history list:
     
+    ![Context menu](img/context-menu.png)
+    
+    All of these options behave as described above.

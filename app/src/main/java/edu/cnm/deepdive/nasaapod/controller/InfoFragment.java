@@ -25,6 +25,8 @@ import android.view.View;
 import android.widget.TextView;
 import edu.cnm.deepdive.nasaapod.R;
 import edu.cnm.deepdive.nasaapod.model.entity.Apod;
+import java.text.DateFormat;
+import java.util.Calendar;
 
 public class InfoFragment extends DialogFragment {
 
@@ -50,10 +52,16 @@ public class InfoFragment extends DialogFragment {
   public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
     Apod apod = (Apod) getArguments().getSerializable(APOD_KEY);
     View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_info, null);
+    TextView date = view.findViewById(R.id.date);
     TextView explanation = view.findViewById(R.id.explanation);
+    TextView webUrl = view.findViewById(R.id.web_url);
     TextView url = view.findViewById(R.id.url);
     TextView hdUrl = view.findViewById(R.id.hd_url);
+    DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
+    Calendar calendar = apod.getDate().toCalendar();
+    date.setText(dateFormat.format(calendar.getTime()));
     explanation.setText(apod.getExplanation());
+    webUrl.setText(getString(R.string.web_url_format, calendar));
     url.setText(apod.getUrl());
     if (apod.getHdUrl() != null && !apod.getUrl().equals(apod.getHdUrl())) {
       hdUrl.setText(apod.getHdUrl());
