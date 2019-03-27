@@ -38,6 +38,8 @@
     
         Currently, this presents an alert dialog that allows the user to modify one setting&mdash;the number of files that will be maintained in the app's internal storage. These files are managed as a _most recently used_ (MRU) cache, in which the image files for APODs that have the most recent timestamps on any related access records will be kept in internal storage, while other files will be deleted. Note that this has no effect on files downloaded to the `Pictures` folder.
         
+        The size of the MRU cache can range from 1 (keep only the current image being viewed) to unlimited (no images will be deleted automatically).
+        
         ![Settings](img/settings.png)
         
 6. The history view displays all APOD items retrieved to-date, except for those that have been deleted by the user. Each item shows the APOD date, title, and number of times the user has opened it to view the media content.
