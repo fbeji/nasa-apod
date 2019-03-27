@@ -110,13 +110,15 @@ The only external service currently used in the app is (of course) the [NASA APO
 
 * User confirmation of delete operation.
 
-## Design documentation
+## Design &amp; technical documentation
 
 * ### [User stories](docs/user-stories.md)
 
 * ### [Wireframes](docs/wireframes.md)
 
 * ### [Data model](docs/data-model.md)
+
+* ### [Javadoc](docs/api/)
 
 ## Copyright &amp; license
 

@@ -12,7 +12,9 @@
 
     ![Media display](img/media-display.png)
     
-4. In the image view, a number of options are available in the action bar, and in the overflow menu (under the 3 vertically aligned dots):
+4. The navigator view at the bottom of the screen allows the user to switch between the image view and the history view; the image view is displayed intially by default.
+
+5. In the image view, a number of options are available in the action bar, and in the overflow menu (under the 3 vertically aligned dots):
 
     1. **Download** (shown as a downward arrow)
     
@@ -32,4 +34,9 @@
         
     5. **Settings** (in the overflow menu)
     
+        Currently, this presents an alert dialog that allows the user to modify one setting&mdash;the number of files that will be maintained in the app's internal storage. These files are managed as a _most recently used_ (MRU) cache, in which the image files for APODs that have the most recent timestamps on any related access records will be kept in internal storage, while other files will be deleted. Note that this has no effect on files downloaded to the `Pictures` folder.
+        
+6. The history view displays all APOD items retrieved to-date, except for those that have been deleted by the user. Each item shows the APOD date, title, and number of times the user has opened it to view the media content.
+
+    ![History view](img/history-view.png)
     
