@@ -208,7 +208,7 @@ public class ImageFragment extends Fragment {
           return null;
         })
         .setSuccessListener((v) -> {
-          setApod(null);
+          getNavActivity().resetApod();
         })
         .execute(apod);
   }

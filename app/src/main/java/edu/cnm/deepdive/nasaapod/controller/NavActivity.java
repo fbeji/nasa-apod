@@ -134,10 +134,28 @@ public class NavActivity extends AppCompatActivity
     return downloadPermission;
   }
 
+  /**
+   * Loads the current day's APOD.
+   */
+  public void resetApod() {
+    loadApod(Date.today());
+  }
+
+  /**
+   * Switches the currently highlighted item in the bottom navigation view to the specified item.
+   *
+   * @param id navigation menu item ID to be selected.
+   */
   public void setSelectedNavigationItemId(int id) {
     navigation.setSelectedItemId(id);
   }
 
+  /**
+   * Displays or hides the loading progress indicator.
+   *
+   * @param visible flag to display (<code>true</code>) or hide (<code>false</code>) the loading
+   * indicator.
+   */
   public void showLoading(boolean visible) {
     loading.setVisibility(visible ? View.VISIBLE : View.GONE);
   }
@@ -194,7 +212,7 @@ public class NavActivity extends AppCompatActivity
       historyFragment = new HistoryFragment();
       fragmentService.loadFragment(this, R.id.fragment_container, historyFragment,
           historyFragment.getClass().getSimpleName(), false);
-      loadApod(Date.today());
+      resetApod();
     } else {
       imageFragment = (ImageFragment) fragmentService.findFragment(
           this, R.id.fragment_container, ImageFragment.class.getSimpleName());
