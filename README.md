@@ -46,8 +46,8 @@ Note that the Stetho inspection features are currently still enabled; for a prod
 
 ##### LG Q7+, Android 8.1 (API 27)
 
-* Difficulty in getting a clean install of debug APK; appears to be a device configuration issue.
-* No issues observed after full uninstall &amp; re-install.
+* When in portrait orientation, scaling of images to the display width (performed automatically by the `WebView` component) is unreliable: The first time any given image is loaded &amp; displayed (whether via using the date picker in the image view, or by selecting an item in the history view), it is displayed zoomed-in, using a width suitable to landscape, rather than fitting the width of the display; usually (but not always) subsequent displays of the same image are scaled correctly.
+* No other issues observed.
 
 #### Emulators
 
@@ -128,7 +128,7 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-* [Full (including 3<sup>rd</sup>-party) copyright &amp; license notices](docs/notice.md) 
+* ### [Full (including 3<sup>rd</sup>-party) copyright &amp; license notices](docs/notice.md) 
 
 ## Instructions
 
