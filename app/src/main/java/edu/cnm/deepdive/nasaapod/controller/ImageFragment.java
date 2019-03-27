@@ -87,7 +87,8 @@ public class ImageFragment extends Fragment {
   @Override
   public void onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    menu.findItem(R.id.image_download).setVisible(apod != null && apod.isMediaImage());
+    menu.findItem(R.id.image_download).setVisible(
+        apod != null && apod.isMediaImage() && getNavActivity().hasDownloadPermission());
   }
 
   @Override

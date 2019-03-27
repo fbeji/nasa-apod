@@ -83,7 +83,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
   @Override
   public void onClick(View view) {
     Apod apod = (Apod) view.getTag();
-    NavActivity activity = ((NavActivity) getActivity());
+    NavActivity activity = getNavActivity();
     FragmentService.getInstance()
         .getShowFragmentTransaction(activity, R.id.fragment_container, imageFragment)
         .runOnCommit(() -> imageFragment.setApod(apod))
@@ -111,15 +111,10 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
             history.clear();
             history.addAll(apods);
             adapter.notifyDataSetChanged();
-            ((NavActivity) getActivity()).showLoading(false);
+            getNavActivity().showLoading(false);
           })
           .execute();
     }
-  }
-
-  @Override
-  public boolean onContextItemSelected(MenuItem item) {
-    return super.onContextItemSelected(item);
   }
 
   /**
@@ -133,24 +128,29 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
    */
   public void createContextMenu(ContextMenu menu, int position, Apod apod) {
     FileStorageService service = FileStorageService.getInstance();
-    getActivity().getMenuInflater().inflate(R.menu.item_context, menu);
+    NavActivity activity = getNavActivity();
+    activity.getMenuInflater().inflate(R.menu.item_context, menu);
     menu.findItem(R.id.context_delete).setOnMenuItemClickListener((item) -> {
       deleteApod(apod, position);
       return true;
     });
     MenuItem download = menu.findItem(R.id.context_download);
-    if (apod.isMediaImage()) {
+    if (apod.isMediaImage() && activity.hasDownloadPermission()) {
       download.setOnMenuItemClickListener((item) -> {
-        ((NavActivity) getActivity()).downloadApod(apod);
+        activity.downloadApod(apod);
         return true;
       });
     } else {
       download.setEnabled(false).setVisible(false);
     }
     menu.findItem(R.id.context_info).setOnMenuItemClickListener((item) -> {
-      ((NavActivity) getActivity()).showFullInfo(apod);
+      activity.showFullInfo(apod);
       return true;
     });
+  }
+
+  private NavActivity getNavActivity() {
+    return (NavActivity) getActivity();
   }
 
   private void deleteApod(Apod apod, int position) {

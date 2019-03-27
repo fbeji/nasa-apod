@@ -57,6 +57,7 @@ public class NavActivity extends AppCompatActivity
   private HistoryFragment historyFragment;
   private ProgressBar loading;
   private BottomNavigationView navigation;
+  private boolean downloadPermission;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +77,10 @@ public class NavActivity extends AppCompatActivity
         boolean needRationale =
             ActivityCompat.shouldShowRequestPermissionRationale(this, WRITE_EXTERNAL_STORAGE);
         // TODO Present rationale.
+        downloadPermission = false;
+        invalidateOptionsMenu();
+      } else {
+        downloadPermission = true;
       }
     }
   }
@@ -117,6 +122,16 @@ public class NavActivity extends AppCompatActivity
         handled = super.onOptionsItemSelected(item);
     }
     return handled;
+  }
+
+  /**
+   * Returns a flag indicating whether permission to write to external storage was granted, whether
+   * implicitly (pre-API 26) or explicitly (API 26+).
+   *
+   * @return flag indicating permission to download to external storage.
+   */
+  public boolean hasDownloadPermission() {
+    return downloadPermission;
   }
 
   public void setSelectedNavigationItemId(int id) {
@@ -163,6 +178,8 @@ public class NavActivity extends AppCompatActivity
         != PackageManager.PERMISSION_GRANTED) {
       ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE},
           REQUEST_WRITE_EXTERNAL_PERMISSION);
+    } else {
+      downloadPermission = true;
     }
   }
 
