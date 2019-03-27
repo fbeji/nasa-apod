@@ -85,10 +85,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-### Official text of licenses
-
 ### Official text of applicable licenses
 
-* [Apache License, Version 2.0](licenses/apache-2.0.txt)
-* [MIT License](licenses/mit.txt)
-
+* [Apache License, Version 2.0](licenses/apache-2.0.txt) (NASA APOD Browser, Deep Dive Coding Date Utilities, Deep Dive Coding Android Utilities; Google Gson; Retrofit &amp; OkHttp)
+* [MIT License](licenses/mit.txt) (Stetho)

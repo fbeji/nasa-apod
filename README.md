@@ -112,11 +112,11 @@ The only external service currently used in the app is (of course) the [NASA APO
 
 ## Design documentation
 
-### [User stories](docs/user-stories.md)
+* ### [User stories](docs/user-stories.md)
 
-### [Wireframes](docs/wireframes.md)
+* ### [Wireframes](docs/wireframes.md)
 
-### [Data model](docs/data-model.md)
+* ### [Data model](docs/data-model.md)
 
 ## Copyright &amp; license
 
@@ -128,15 +128,10 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-### [Full (including 3<sup>rd</sup>-party) copyright &amp; license notices](docs/notice.md) 
-
-### Official text of applicable licenses
-
-* [Apache License, Version 2.0](docs/licenses/apache-2.0.txt)
-* [MIT License](docs/licenses/mit.txt)
+* [Full (including 3<sup>rd</sup>-party) copyright &amp; license notices](docs/notice.md) 
 
 ## Instructions
 
-### [Building the app](docs/build-instructions.md)
+* ### [Building the app](docs/build-instructions.md)
 
-### [Using the app](docs/user-instructions.md)
+* ### [Using the app](docs/user-instructions.md)
